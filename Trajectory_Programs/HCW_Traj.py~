@@ -1,0 +1,33 @@
+import numpy as np
+import cvxpy as cvx
+import scipy as sp
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from RelativeMotion import *
+
+mu = 3.986*10**14
+a = 6678*10**3
+n = np.sqrt(mu/a**3)
+nu = 6
+ny = 6
+
+S = RelativeMotion()
+Ac = S.hcw(n)
+Bc = S.inputMats(nu)
+method = 'zoh'
+Ts = 10
+sysc,sysd =  S.discretizeSystem(n,nu,ny,Ts,method)
+t0 = 0
+tf = 2*np.pi/n
+A = sysd.A
+
+x0 = 100
+X0 = np.matrix([[x0,-100,300,0,-2*n*x0,0]])
+X0 = np.transpose(X0)
+print X0
+X = S.discHCWSim(t0,tf,Ts,X0,n)
+print X
+fig3d = plt.figure()
+ax = fig3d.add_subplot(111,projection = '3d')
+ax.plot(X[0,:],X[1,:],X[2,:])
+plt.show()

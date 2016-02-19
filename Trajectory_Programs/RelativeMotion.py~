@@ -1,0 +1,70 @@
+import numpy as np
+import control as ctrl
+
+class RelativeMotion:
+
+    def hcw(self,n):
+        self.n = n
+        n2 = n**2
+        A = np.matrix([[0,0,0,1,0,0],[0,0,0,0,1,0],[0,0,0,0,0,1],[3*n2,0,0,0,2*n,0],[0,0,0,-2*n,0,0],[0,0,-n2,0,0,0]])
+
+        return A
+
+    def inputMats(self,nu):
+        self.nu = nu
+        if nu == 2:
+            B = np.matrix([[0,0],[0,0],[0,0],[0,0],[1,0],[0,1]])
+        elif nu == 3:
+            B = np.matrix([[0,0,0],[0,0,0],[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
+        elif nu == 4:
+            B = np.matrix([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,0,0,-1,0],[0,0,1,0,0,-1]])
+        elif nu == 6:
+            B = np.matrix([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[1,0,0,-1,0,0],[0,1,0,0,-1,0],[0,0,1,0,0,-1]])
+        else:
+            B = 'Define new input matrix attribute'
+
+        return B
+
+    def observer(self,ny):
+        if ny == 3:
+            C = np.matrix([[1,0,0,0,0,0],[0,1,0,0,0,0],[0,0,1,0,0,0]])
+        elif ny == 6:
+            C = np.matrix([[1,0,0,0,0,0],[0,1,0,0,0,0],[0,0,1,0,0,0],[0,0,0,1,0,0],[0,0,0,0,1,0],[0,0,0,0,0,1]])
+        else:
+            C = 'Define proper observer'
+
+        return C
+    
+    def feedForward(self,nu,ny):
+        self.nu = nu
+        self.ny = ny
+        D = np.zeros((ny,nu))
+
+        return D
+    
+    def discretizeSystem(self,n,nu,ny,Ts,method):
+        self.Ts = Ts
+        self.method = method
+        
+        sysc = ctrl.ss(self.hcw(n),self.inputMats(nu),self.observer(ny),self.feedForward(ny,nu))
+        sysd = ctrl.matlab.c2d(sysc,Ts,method)
+
+        return sysc,sysd
+
+    def discHCWSim_initial(self,X0,t0,tf,Ts,n,nu,ny,method):
+        self.X0 = X0
+        self.t0 = t0
+        self.tf = tf
+        self.Ts = Ts
+        self.n = n
+        self.nu = nu
+        self.ny = ny
+        self.method = method
+
+        sysc = self.discretizeSystem(n,nu,ny,Ts,method)
+        return sysc
+
+
+    
+    def __init__(self):
+        self.data = []
