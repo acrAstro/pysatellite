@@ -105,14 +105,14 @@ class RelativeMotion:
 
         x = cvx.Variable(6,numSteps+1)
         u = cvx.Variable(nu,numSteps)
-
+        
         states = []
         umin = np.zeros((nu,1))
         umax = Umax*np.ones((nu,1))
         for i in range(numSteps):
             cost = cvx.norm(u[:,i],1)
             constraints = [x[:,i+1] == A*x[:,i] + B*u[:,i],
-                           umin <= u[:,i],u[:,i] <= umax]
+                           u[0:nu/2-1,i] <= umax,u[nu/2:end,i] <= umax]
             states.append(cvx.Problem(cvx.Minimize(cost),constraints))
 
         prob = sum(states)

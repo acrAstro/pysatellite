@@ -29,12 +29,14 @@ sysc,sysd = S.discretizeSystem(n,nu,ny,Ts,method)
 
 X = S.discHCWSim_initial(X0,t0,tf,Ts,n,nu,ny,method)
 
-Xc, Uc = S.minFuelHCW(np.transpose(X0),np.transpose(Xf),t0,tf,Ts,n,nu,ny,method,Umax)
+#Xc, Uc = S.minFuelHCW(np.transpose(X0),np.transpose(Xf),t0,tf,Ts,n,nu,ny,method,Umax)
 
-print X.shape, Xc.shape
+#print X.shape, Xc.shape
+
+#print Uc
 
 fig,(ax1,ax2) = plt.subplots(1,2, figsize = (12,4), subplot_kw = {'projection':'3d'})
-for ax,xyz,c in [(ax1,X,'b'),(ax2,Xc,'r')]:
+for ax,xyz,c in [(ax1,X,'b'),(ax2,X,'r')]:
     ax.plot(xyz[0,:],xyz[1,:],xyz[2,:],c)
     ax.set_xlabel('$x$',fontsize = 16)
     ax.set_ylabel('$y$',fontsize = 16)
