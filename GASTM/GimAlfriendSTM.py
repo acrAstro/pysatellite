@@ -8,17 +8,75 @@ class GimAlfriendSTM:
         self.data = []
     
     def lam2theta(self,lam,q1,q2,tol):
+        # Calculates true longitude from mean longitude
         
+        # Inputs:
+        # lambda = mean longitude, M + w
+        # q1 = e*cos(w)
+        # q2 = e*sin(w)
+        # tol = tolerance for solving Kepler's equation
+        
+        # Outputs:
+        # theta = true longitude, f + w
+        # F = eccentric longitude, E + w
+        
+        eta = np.sqrt(1 - q1**2 - q2**2)
+       
+        # Solve Kepler's Equation via Newton-Raphson      
+        F = lam
+        FF = 1
+        while abs(FF) > tol:
+            FF = lam - (F - q1*np.sin(F) + q2*np.cos(F))
+            dFFdF = -(1 - q1*np.cos(F) - q2*np.sin(F))
+            delF = -FF/dFFdF
+            F = F + delF
+        
+        # True longitude
+        x1 = (1+eta)*(eta*np.sin(F) - q2) + q2*(q1*np.cos(F) + q2*np.sin(F))
+        x2 = (1+eta)*(eta*np.cos(F) - q1) + q1*(q1*np.cos(F) + q2*np.sin(F))
+        theta = np.arctan2(x1,x2)
+        
+        while theta < 0:
+            theta = theta + 2*np.pi
+        while theta >= 2*np.pi:
+            theta = theta - 2*np.pi
+            
+        if lam < 0:
+            kkPlus = 0
+            quadPlus = 0
+            while lam < 0:
+                kkPlus = kkPlus + 1
+                lam = lam + 2*np.pi
+            if lam < (np.pi/2) and theta > np.pi:
+                quadPlus = 1
+            elif theta < np.pi/2 and lam > np.pi:
+                quadPlus = -1
+            theta = theta - (kkPlus+quadPlus)*2*np.pi
+        else:
+            kkMinus = 0
+            quadMinus = 0
+            while lam >= 2*np.pi:
+                kkMinus = kkMinus + 1
+                lam = lam - 2*np.pi
+            if lam < (np.pi/2) and theta > np.pi:
+                quadMinus = -1
+            elif theta < np.pi/2 and lam > np.pi:
+                quadMinus = 1
+            theta = theta + (kkMinus + quadMinus)*2*np.pi
+
         return theta, F
     
     def theta2lam(self,a,theta,q1,q2):
         # Calculates mean longitude from true longitude
         
-        # Inputs
+        # Inputs:
         # a = semi-major axis
-        # theta = true longitude
+        # theta = true longitude, f + w
         # q1 = e*cos(w)
         # q2 = e*sin(w)
+        
+        # Output:
+        # lambda = mean longitude
         
         self.a = a
         self.theta = theta
@@ -47,20 +105,20 @@ class GimAlfriendSTM:
             while theta < 0:
                 kkPlus = kkPlus + 1
                 theta = theta + 2*np.pi
-            if theta < np.pi/2 && lam > np.pi:
+            if theta < (np.pi/2) and lam > np.pi:
                 quadPlus = 1
-            elif lam < np.pi/2 && theta > np.pi:
+            elif lam < (np.pi/2) and theta > np.pi:
                 quadPlus = -1
-            lam = lam - (kkplud+quadPlus)*2*np.pi
+            lam = lam - (kkPlus+quadPlus)*2*np.pi
         else:
             kkMinus = 0
             quadMinus = 0
             while theta >= 2*np.pi:
                 kkMinus = kkMinus + 1
                 theta = theta - 2*np.pi
-            if theta < np.pi/2 && lam > np.pi:
+            if theta < (np.pi/2) and lam > np.pi:
                 quadMinus = -1
-            elif lam < np.pi/2 && theta > np.pi:
+            elif lam < (np.pi/2) and theta > np.pi:
                 quadMinus = 1
             lam = lam + (kkMinus+quadMinus)*2*np.pi
         return lam
