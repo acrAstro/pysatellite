@@ -7,6 +7,10 @@ class GimAlfriendSTM:
         # Instantiate class
         self.data = []
     
+    def lam2theta(self,lam,q1,q2,tol):
+        
+        return theta, F
+    
     def theta2lam(self,a,theta,q1,q2):
         # Calculates mean longitude from true longitude
         
