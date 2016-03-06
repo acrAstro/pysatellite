@@ -1,12 +1,31 @@
 import numpy as np
 
 class GimAlfriendSTM:
-
+# Class to compute the time evolution of the relative motion of two satellites
+# under the influence of J2
     def __init__(self):
+        # Instantiate class
         self.data = []
         
     def MeanElemsSTM(self,J2,t,ICSc,Re,mu,tol):
         # State transition matrix of mean orbital elements due to J2
+        
+        # Inputs: time, initial non-singular relative orbital elements
+        # t[0] = t_0
+        # t[1] = t_1
+        
+        # ICSc[0] = a0
+        # ICSc[1] = argLat0
+        # ICSc[2] = inc0
+        # ICSc[3] = q10
+        # ICSc[4] = q20
+        # ICSc[5] = RAAN0
+        
+        # Outputs:
+        # Phi_J2 = 6x6 state transition matrix for mean orbital elements
+        # cond_c = final elements after time step
+        
+        
         self.J2 = J2
         self.t = t
         self.ICSc = ICSc
@@ -31,7 +50,7 @@ class GimAlfriendSTM:
         p0 = a0*(1 - q10**2 - q20**2)
         R0 = p0/(1 + q10*np.cos(argLat0) + q20*np.sin(argLat0))
         Vr0 = np.sqrt(mu/p0)*(q10*np.sin(argLat0) - q20*np.cos(argLat0))
-        Vt0 = sqrt(mu/p0)*(1 + q10*np.cos(argLat0) + q20*np.sin(argLat0))
+        Vt0 = np.sqrt(mu/p0)*(1 + q10*np.cos(argLat0) + q20*np.sin(argLat0))
         eta0 = np.sqrt(1 - q10**2 - q20**2)
         
         lam0 = self.theta2lam(a0,argLat0,q10,q20)
@@ -114,5 +133,7 @@ class GimAlfriendSTM:
         phi66 = 1
         
         Phi_J2 = np.matrix([[phi11,phi12,phi13,phi14,phi15,phi16],[phi21,phi22,phi23,phi24,phi25,phi26],[phi31,phi32,phi33,phi34,phi35,phi36],[phi41,phi42,phi43,phi44,phi45,phi46],[phi51,phi52,phi53,phi54,phi55,phi56],[phi61,phi62,phi63,phi64,phi65,phi66]])
-        cond_c = np.matrix([a theta inc q1 q2 Omega]).T
-        return Phi_J2,cond_c
+        cond_c = np.matrix([a, theta, inc, q1, q2, Omega]).T
+        return Phi_J2, cond_c
+        
+        
