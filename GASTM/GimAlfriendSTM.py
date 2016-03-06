@@ -6,7 +6,61 @@ class GimAlfriendSTM:
     def __init__(self):
         # Instantiate class
         self.data = []
+    
+    def theta2lam(self,a,theta,q1,q2):
+        # Calculates mean longitude from true longitude
         
+        # Inputs
+        # a = semi-major axis
+        # theta = true longitude
+        # q1 = e*cos(w)
+        # q2 = e*sin(w)
+        
+        self.a = a
+        self.theta = theta
+        self.q1 = q1
+        self.q2 = q2
+
+        eta = np.sqrt(1 - q1**2 - q2**2)        
+        beta = 1/(eta*(1+eta))
+        R = a*eta**2/(1 + q1*np.cos(theta) + q2*np.sin(theta))
+
+        x1 = R*(1+beta*q1**2)*np.sin(theta) - beta*R*q1*q2*np.cos(theta) + a*q2
+        x2 = R*(1+beta*q2**2)*np.cos(theta) - beta*R*q1*q2*np.sin(theta) + a*q1
+
+        F = np.arctan2(x1,x2)
+
+        lam = F - q1*np.sin(F) + q2*np.cos(F)
+        
+        while lam < 0:
+            lam = lam + 2*np.pi
+        while lam >= 2*np.pi:
+            lam = lam - 2*np.pi
+        
+        if theta < 0:
+            kkPlus = 0
+            quadPlus = 0
+            while theta < 0:
+                kkPlus = kkPlus + 1
+                theta = theta + 2*np.pi
+            if theta < np.pi/2 && lam > np.pi:
+                quadPlus = 1
+            elif lam < np.pi/2 && theta > np.pi:
+                quadPlus = -1
+            lam = lam - (kkplud+quadPlus)*2*np.pi
+        else:
+            kkMinus = 0
+            quadMinus = 0
+            while theta >= 2*np.pi:
+                kkMinus = kkMinus + 1
+                theta = theta - 2*np.pi
+            if theta < np.pi/2 && lam > np.pi:
+                quadMinus = -1
+            elif lam < np.pi/2 && theta > np.pi:
+                quadMinus = 1
+            lam = lam + (kkMinus+quadMinus)*2*np.pi
+        return lam
+    
     def MeanElemsSTM(self,J2,t,ICSc,Re,mu,tol):
         # State transition matrix of mean orbital elements due to J2
         
@@ -24,7 +78,6 @@ class GimAlfriendSTM:
         # Outputs:
         # Phi_J2 = 6x6 state transition matrix for mean orbital elements
         # cond_c = final elements after time step
-        
         
         self.J2 = J2
         self.t = t
